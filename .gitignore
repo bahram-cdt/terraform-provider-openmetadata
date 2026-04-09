@@ -1,0 +1,23 @@
+# Build artifacts
+terraform-provider-openmetadata
+dist/
+
+# Go
+.go/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
