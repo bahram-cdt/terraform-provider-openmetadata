@@ -19,9 +19,9 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      - uses: golangci/golangci-lint-action@4afd733a84b19d05abb4815b0e147a9805163dff # v6.5.0
+      - uses: golangci/golangci-lint-action@55c2c1448f86e01eaae002a5a3a9624417608d84 # v6.5.2
         with:
-          version: v1.61
+          version: v1.64
 
   test:
     runs-on: ubuntu-latest
