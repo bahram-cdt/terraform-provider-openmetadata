@@ -265,6 +265,10 @@ func (r *TeamResource) readIntoState(ctx context.Context, raw []byte, state *Tea
 	state.Email = StringVal(data, "email")
 	state.IsJoinable = BoolVal(data, "isJoinable")
 	state.FQN = StringVal(data, "fullyQualifiedName")
+	state.Parents = StringListVal(data, "parents")
+	state.Policies = StringListVal(data, "policies")
+	state.Domains = StringListVal(data, "domains")
+	state.Owners = OwnersListNull()
 }
 
 // addDiagError is a helper that works with both Create/Update/Read response types.

@@ -226,6 +226,8 @@ func (r *TagResource) readIntoState(raw []byte, state *TagResourceModel) {
 	state.Description = StringVal(data, "description")
 	state.MutuallyExclusive = BoolVal(data, "mutuallyExclusive")
 	state.FQN = StringVal(data, "fullyQualifiedName")
+	state.Domains = StringListVal(data, "domains")
+	state.Owners = OwnersListNull()
 
 	// Extract classification from FQN (first segment)
 	if fqn := state.FQN.ValueString(); fqn != "" {

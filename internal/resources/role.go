@@ -193,8 +193,7 @@ func (r *RoleResource) readIntoState(raw []byte, state *RoleResourceModel) {
 	state.Name = StringVal(data, "name")
 	state.DisplayName = StringVal(data, "displayName")
 	state.Description = StringVal(data, "description")
-	if names := EntityRefNames(data, "policies"); names != nil {
-		state.Policies, _ = types.ListValueFrom(context.Background(), types.StringType, names)
-	}
+	state.Policies = StringListVal(data, "policies")
+	state.Domains = StringListVal(data, "domains")
 	state.FQN = StringVal(data, "fullyQualifiedName")
 }

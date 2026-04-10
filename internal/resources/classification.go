@@ -194,6 +194,8 @@ func (r *ClassificationResource) readIntoState(raw []byte, state *Classification
 	state.Description = StringVal(data, "description")
 	state.MutuallyExclusive = BoolVal(data, "mutuallyExclusive")
 	state.FQN = StringVal(data, "fullyQualifiedName")
+	state.Domains = StringListVal(data, "domains")
+	state.Owners = OwnersListNull()
 }
 
 // extractOwnerRefs is a shared helper for converting owners list to EntityRef slice.

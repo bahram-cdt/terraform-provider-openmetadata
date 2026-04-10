@@ -217,4 +217,6 @@ func (r *PolicyResource) readIntoState(raw []byte, state *PolicyResourceModel) {
 	state.Enabled = BoolVal(data, "enabled")
 	state.Location = StringVal(data, "location")
 	state.FQN = StringVal(data, "fullyQualifiedName")
+	state.Domains = StringListVal(data, "domains")
+	state.Owners = OwnersListNull()
 }

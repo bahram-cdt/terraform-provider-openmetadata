@@ -63,9 +63,12 @@ func (r *DatabaseServiceResource) Schema(_ context.Context, _ resource.SchemaReq
 				},
 			},
 			"connection_json": schema.StringAttribute{
-				Description: "Database connection configuration as a JSON string. The structure depends on the service_type. Example: {\"config\":{\"type\":\"Mysql\",\"hostPort\":\"localhost:3306\"}}",
-				Optional:    true,
-				Sensitive:   true,
+				Description: "Database connection configuration as a JSON string. The structure depends on the service_type. " +
+					"See the JSON schema for each connector at: " +
+					"https://github.com/open-metadata/OpenMetadata/tree/main/openmetadata-spec/src/main/resources/json/schema/entity/services/connections/database " +
+					"You can also inspect your instance's Swagger UI at {host}/swagger.html under PUT /v1/services/databaseServices.",
+				Optional:  true,
+				Sensitive: true,
 			},
 			"owners":  OwnersAttribute(),
 			"domains": DomainsAttribute(),
@@ -222,6 +225,8 @@ func (r *DatabaseServiceResource) readIntoState(raw []byte, state *DatabaseServi
 	state.Description = StringVal(data, "description")
 	state.ServiceType = StringVal(data, "serviceType")
 	state.FQN = StringVal(data, "fullyQualifiedName")
+	state.Domains = StringListVal(data, "domains")
+	state.Owners = OwnersListNull()
 	// Note: connection is not read back — it's sensitive and OM may mask fields.
 	// The user-provided connection_json is preserved in state as-is.
 }

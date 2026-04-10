@@ -4,6 +4,9 @@ resource "openmetadata_database_service" "postgres" {
   display_name = "Production PostgreSQL"
   description  = "Main production PostgreSQL database."
 
+  # The connection_json structure varies per service_type.
+  # See the JSON schema for each connector:
+  # https://github.com/open-metadata/OpenMetadata/tree/main/openmetadata-spec/src/main/resources/json/schema/entity/services/connections/database
   connection_json = jsonencode({
     config = {
       type             = "Postgres"

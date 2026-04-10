@@ -5,9 +5,11 @@
 package resources
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -122,8 +124,8 @@ func BoolVal(data map[string]interface{}, key string) types.Bool {
 	return types.BoolNull()
 }
 
-// StringListVal converts a JSON array of strings to a types.List.
-func StringListVal(data map[string]interface{}, key string) []string {
+// RawStringList extracts a plain JSON array of strings (e.g., synonyms).
+func RawStringList(data map[string]interface{}, key string) []string {
 	if v, ok := data[key]; ok && v != nil {
 		if arr, ok := v.([]interface{}); ok {
 			result := make([]string, 0, len(arr))
@@ -179,6 +181,35 @@ func EntityRefNames(data map[string]interface{}, key string) []string {
 		}
 	}
 	return nil
+}
+
+// StringListVal extracts entity ref names from data and returns a typed types.List.
+// Returns a null list if the key is absent or has no entries.
+func StringListVal(data map[string]interface{}, key string) types.List {
+	if names := EntityRefNames(data, key); len(names) > 0 {
+		list, _ := types.ListValueFrom(context.Background(), types.StringType, names)
+		return list
+	}
+	return types.ListNull(types.StringType)
+}
+
+// StringSliceToList converts a []string (or nil) into a typed types.List of StringType.
+func StringSliceToList(vals []string) types.List {
+	if len(vals) > 0 {
+		list, _ := types.ListValueFrom(context.Background(), types.StringType, vals)
+		return list
+	}
+	return types.ListNull(types.StringType)
+}
+
+// OwnersListNull returns a properly typed null list for the owners attribute.
+func OwnersListNull() types.List {
+	return types.ListNull(types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"id":   types.StringType,
+			"type": types.StringType,
+		},
+	})
 }
 
 // Unmarshal parses a json.RawMessage into a map.

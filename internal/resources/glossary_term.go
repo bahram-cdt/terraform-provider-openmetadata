@@ -260,4 +260,9 @@ func (r *GlossaryTermResource) readIntoState(raw []byte, state *GlossaryTermReso
 			}
 		}
 	}
+
+	state.Synonyms = StringSliceToList(RawStringList(data, "synonyms"))
+	state.RelatedTerms = StringListVal(data, "relatedTerms")
+	state.Domains = StringListVal(data, "domains")
+	state.Owners = OwnersListNull()
 }
