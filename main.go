@@ -13,11 +13,8 @@ import (
 	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/provider"
 )
 
-var (
-	// These will be set by goreleaser or the build system.
-	version string = "dev"
-	commit  string = "none"
-)
+// version is set by goreleaser via ldflags.
+var version string = "dev"
 
 func main() {
 	opts := providerserver.ServeOpts{
