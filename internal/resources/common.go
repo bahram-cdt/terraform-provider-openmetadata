@@ -46,17 +46,26 @@ func DisplayNameAttribute() schema.StringAttribute {
 		Description: "Human-readable display name.",
 		Optional:    true,
 		Computed:    true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	}
 }
 
 // DescriptionAttribute returns a description attribute (required or optional).
 func DescriptionAttribute(required bool) schema.StringAttribute {
-	return schema.StringAttribute{
+	attr := schema.StringAttribute{
 		Description: "Markdown description of the resource.",
 		Required:    required,
 		Optional:    !required,
 		Computed:    !required,
 	}
+	if !required {
+		attr.PlanModifiers = []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		}
+	}
+	return attr
 }
 
 // FullyQualifiedNameAttribute returns a computed FQN attribute.
@@ -64,6 +73,9 @@ func FullyQualifiedNameAttribute() schema.StringAttribute {
 	return schema.StringAttribute{
 		Description: "Fully qualified name of the resource.",
 		Computed:    true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	}
 }
 
@@ -89,6 +101,26 @@ func OwnersAttribute() schema.ListNestedAttribute {
 				},
 				"type": schema.StringAttribute{
 					Description: "Type of the owner entity (user or team).",
+					Required:    true,
+				},
+			},
+		},
+	}
+}
+
+// ExpertsAttribute returns the optional "experts" block (same shape as owners).
+func ExpertsAttribute() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
+		Description: "Users who are experts for this resource.",
+		Optional:    true,
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: map[string]schema.Attribute{
+				"id": schema.StringAttribute{
+					Description: "UUID of the expert user.",
+					Required:    true,
+				},
+				"type": schema.StringAttribute{
+					Description: "Type of the expert entity (user).",
 					Required:    true,
 				},
 			},

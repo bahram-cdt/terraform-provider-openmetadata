@@ -79,12 +79,12 @@ func (r *TeamResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Default:     booldefault.StaticBool(true),
 			},
 			"parents": schema.ListAttribute{
-				Description: "UUIDs of parent teams.",
+				Description: "Names or fully qualified names of parent teams.",
 				Optional:    true,
 				ElementType: types.StringType,
 			},
 			"policies": schema.ListAttribute{
-				Description: "UUIDs of policies attached to this team.",
+				Description: "Names or fully qualified names of policies attached to this team.",
 				Optional:    true,
 				ElementType: types.StringType,
 			},
