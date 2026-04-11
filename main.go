@@ -9,8 +9,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/provider"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
 // version is set by goreleaser via ldflags.

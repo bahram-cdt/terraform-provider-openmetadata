@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -15,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/client"
 )
 
 var _ resource.Resource = &TeamResource{}

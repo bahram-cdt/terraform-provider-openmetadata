@@ -8,13 +8,13 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/client"
 )
 
 var _ resource.Resource = &DatabaseServiceResource{}

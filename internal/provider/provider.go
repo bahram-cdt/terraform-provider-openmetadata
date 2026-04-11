@@ -7,13 +7,13 @@ import (
 	"context"
 	"os"
 
+	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/client"
+	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/resources"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/client"
-	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/resources"
 )
 
 var _ provider.Provider = &OpenMetadataProvider{}
