@@ -12,6 +12,18 @@ dist/
 *.tfplan
 crash.log
 
+# Docker — volume data written by docker compose (never commit runtime data)
+docker/test/docker-volume/
+
+# Claude Code — local agent config, memory, and skills (dev-only, not project files)
+.claude/
+
+# Temporary scratch files (per workspace convention: tmp/<ticket-or-session>/)
+tmp/
+
+# The OpenMetadata source symlink used for local schema reference only
+OpenMetadata
+
 # IDE
 .idea/
 .vscode/

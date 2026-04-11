@@ -42,3 +42,39 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
       - run: go build -o terraform-provider-openmetadata .
+
+  resource-test-coverage:
+    name: Every resource has an acceptance test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check resource → test file mapping
+        run: |
+          # Every .go file in internal/resources/ (except common.go) must have a
+          # matching *_resource_test.go in internal/provider/.
+          #
+          # Naming convention:
+          #   internal/resources/my_resource.go
+          #   → internal/provider/my_resource_resource_test.go
+          #
+          # To add a new resource, you must also add the corresponding test file.
+          MISSING=()
+          for res in internal/resources/*.go; do
+            base="$(basename "$res" .go)"
+            [ "$base" = "common" ] && continue
+            test_file="internal/provider/${base}_resource_test.go"
+            if [ ! -f "$test_file" ]; then
+              MISSING+=("$test_file (resource: $res)")
+            fi
+          done
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "ERROR: The following resource files are missing acceptance tests:"
+            for m in "${MISSING[@]}"; do
+              echo "  - $m"
+            done
+            echo ""
+            echo "Every resource in internal/resources/ (except common.go) must have"
+            echo "a corresponding acceptance test in internal/provider/."
+            exit 1
+          fi
+          echo "All resources have acceptance tests. ✓"

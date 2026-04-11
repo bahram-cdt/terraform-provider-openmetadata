@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/client"
@@ -53,10 +55,13 @@ func (r *ClassificationResource) Schema(_ context.Context, _ resource.SchemaRequ
 			"description":          DescriptionAttribute(true),
 			"fully_qualified_name": FullyQualifiedNameAttribute(),
 			"mutually_exclusive": schema.BoolAttribute{
-				Description: "When true, tags in this classification are mutually exclusive (entity can have only one). When false, multiple tags can coexist.",
+				Description: "When true, tags in this classification are mutually exclusive (entity can have only one). When false, multiple tags can coexist. Changing this value forces a new resource.",
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplace(),
+				},
 			},
 			"domains": DomainsAttribute(),
 			"owners":  OwnersAttribute(),

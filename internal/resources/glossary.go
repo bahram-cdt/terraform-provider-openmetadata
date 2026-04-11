@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/client"
@@ -53,10 +55,13 @@ func (r *GlossaryResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"description":          DescriptionAttribute(true),
 			"fully_qualified_name": FullyQualifiedNameAttribute(),
 			"mutually_exclusive": schema.BoolAttribute{
-				Description: "When true, glossary terms that are direct children are mutually exclusive.",
+				Description: "When true, glossary terms that are direct children are mutually exclusive. Changing this value forces a new resource.",
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplace(),
+				},
 			},
 			"domains": DomainsAttribute(),
 			"owners":  OwnersAttribute(),

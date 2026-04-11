@@ -79,7 +79,7 @@ func (r *TeamResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Default:     booldefault.StaticBool(true),
 			},
 			"parents": schema.ListAttribute{
-				Description: "Names or fully qualified names of parent teams.",
+				Description: "Names or fully qualified names of parent teams. When omitted, OpenMetadata automatically places the team under the root Organisation team; this default is not reflected in state.",
 				Optional:    true,
 				ElementType: types.StringType,
 			},
@@ -265,7 +265,12 @@ func (r *TeamResource) readIntoState(ctx context.Context, raw []byte, state *Tea
 	state.Email = StringVal(data, "email")
 	state.IsJoinable = BoolVal(data, "isJoinable")
 	state.FQN = StringVal(data, "fullyQualifiedName")
-	state.Parents = StringListVal(data, "parents")
+	// parents is intentionally NOT read from the API response. OM always places
+	// teams under Organisation by default, which would override the null state
+	// and cause "Provider produced inconsistent result after apply". Parents
+	// provided by the user are sent on create/update but not reflected back.
+	// For import, parents is excluded via ImportStateVerifyIgnore.
+	state.Parents = types.ListNull(types.StringType)
 	state.Policies = StringListVal(data, "policies")
 	state.Domains = StringListVal(data, "domains")
 	state.Owners = OwnersListNull()

@@ -1,5 +1,5 @@
 BINARY_NAME  := terraform-provider-openmetadata
-MODULE       := github.com/open-metadata/terraform-provider-openmetadata
+MODULE       := github.com/bahram-cdt/terraform-provider-openmetadata
 VERSION     ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 COMMIT      ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
 LDFLAGS      := -s -w -X main.version=$(VERSION) -X main.commit=$(COMMIT)
@@ -8,9 +8,9 @@ OS           := $(shell go env GOOS 2>/dev/null || echo linux)
 ARCH         := $(shell go env GOARCH 2>/dev/null || echo amd64)
 
 # Terraform plugin directory
-TF_PLUGIN_DIR := $(HOME)/.terraform.d/plugins/registry.terraform.io/open-metadata/openmetadata/$(VERSION)/$(OS)_$(ARCH)
+TF_PLUGIN_DIR := $(HOME)/.terraform.d/plugins/registry.terraform.io/bahram-cdt/openmetadata/$(VERSION)/$(OS)_$(ARCH)
 
-.PHONY: build install clean fmt lint test docs codegen deps help
+.PHONY: build install clean fmt lint test testacc testacc-external update-test-compose docs codegen deps help
 
 ## Build the provider binary
 build:
@@ -30,9 +30,28 @@ fmt:
 lint:
 	golangci-lint run ./...
 
-## Run unit tests
+## Run unit tests (no live OpenMetadata required)
 test:
 	go test -v -count=1 ./...
+
+## Run acceptance tests against a local docker-compose OpenMetadata stack.
+## Starts the stack, acquires a JWT, runs TF_ACC=1 tests, and tears down.
+testacc:
+	@bash scripts/testacc.sh
+
+## Run acceptance tests against an already-running OpenMetadata instance.
+## Requires OPENMETADATA_HOST and OPENMETADATA_TOKEN to be exported.
+##   export OPENMETADATA_HOST=http://localhost:8585
+##   export OPENMETADATA_TOKEN=<jwt-token>
+##   make testacc-external
+testacc-external:
+	TF_ACC=1 go test -v -count=1 -timeout 30m ./internal/provider/...
+
+## Re-download the official OpenMetadata docker-compose.yml for the version
+## pinned in docker/test/.env. Run this when bumping OPENMETADATA_VERSION,
+## then commit both docker/test/docker-compose.yml and docker/test/.env.
+update-test-compose:
+	@bash scripts/update-test-compose.sh
 
 ## Generate provider documentation (requires tfplugindocs)
 docs:

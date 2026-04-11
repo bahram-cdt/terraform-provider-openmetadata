@@ -128,6 +128,42 @@ func ExpertsAttribute() schema.ListNestedAttribute {
 	}
 }
 
+// --- Plan modifiers ---
+
+// NormalizeJSONStringModifier is a plan modifier that normalises a JSON string
+// by unmarshalling and re-marshalling it. This produces a canonical,
+// alphabetically-key-sorted representation so that the plan value matches
+// the API response even when the user writes keys in a different order.
+type NormalizeJSONStringModifier struct{}
+
+func (m NormalizeJSONStringModifier) Description(_ context.Context) string {
+	return "Normalises the JSON string to canonical (key-sorted) form."
+}
+
+func (m NormalizeJSONStringModifier) MarkdownDescription(_ context.Context) string {
+	return "Normalises the JSON string to canonical (key-sorted) form."
+}
+
+func (m NormalizeJSONStringModifier) PlanModifyString(_ context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+	if req.PlanValue.IsNull() || req.PlanValue.IsUnknown() {
+		return
+	}
+	var v interface{}
+	if err := json.Unmarshal([]byte(req.PlanValue.ValueString()), &v); err != nil {
+		return // leave invalid JSON as-is; provider will report the error later
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		return
+	}
+	resp.PlanValue = types.StringValue(string(b))
+}
+
+// NormalizeJSONString returns a plan modifier that canonical-sorts a JSON string.
+func NormalizeJSONString() planmodifier.String {
+	return NormalizeJSONStringModifier{}
+}
+
 // --- JSON helpers ---
 
 // EntityRef is the OM entity reference used in owners, reviewers, etc.

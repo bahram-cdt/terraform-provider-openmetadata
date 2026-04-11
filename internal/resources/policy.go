@@ -7,13 +7,12 @@ package resources
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/bahram-cdt/terraform-provider-openmetadata/internal/client"
@@ -59,7 +58,9 @@ func (r *PolicyResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 			"description":  DescriptionAttribute(false),
 			"owners":  OwnersAttribute(),
 			"rules": schema.StringAttribute{
-				Description: "",
+				Description: "Policy rules as a JSON array string. At least one rule is required. " +
+					"The value is sent to the API on create/update but is not read back (the API may " +
+					"reorder JSON fields). Supply the exact JSON you want stored in Terraform state.",
 				Required: true,
 			},
 			"enabled": schema.BoolAttribute{
@@ -98,7 +99,11 @@ func (r *PolicyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	body := r.buildBody(ctx, &plan)
+	body, err := r.buildBody(ctx, &plan)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid policy configuration", err.Error())
+		return
+	}
 	raw, err := r.client.CreateOrUpdate(ctx, policyCollection, body)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating policy", err.Error())
@@ -137,7 +142,11 @@ func (r *PolicyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	body := r.buildBody(ctx, &plan)
+	body, err := r.buildBody(ctx, &plan)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid policy configuration", err.Error())
+		return
+	}
 	raw, err := r.client.CreateOrUpdate(ctx, policyCollection, body)
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating policy", err.Error())
@@ -176,11 +185,16 @@ func (r *PolicyResource) ImportState(ctx context.Context, req resource.ImportSta
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *PolicyResource) buildBody(ctx context.Context, plan *PolicyResourceModel) map[string]interface{} {
+func (r *PolicyResource) buildBody(ctx context.Context, plan *PolicyResourceModel) (map[string]interface{}, error) {
 	body := map[string]interface{}{
 		"name": plan.Name.ValueString(),
-		"rules": plan.Rules.ValueString(),
 	}
+	// rules must be sent as a JSON array, not a raw string.
+	var rules interface{}
+	if err := json.Unmarshal([]byte(plan.Rules.ValueString()), &rules); err != nil {
+		return nil, fmt.Errorf("invalid rules JSON: %w", err)
+	}
+	body["rules"] = rules
 	if !plan.Description.IsNull() && !plan.Description.IsUnknown() {
 		body["description"] = plan.Description.ValueString()
 	}
@@ -201,7 +215,7 @@ func (r *PolicyResource) buildBody(ctx context.Context, plan *PolicyResourceMode
 		plan.Domains.ElementsAs(ctx, &vals, false)
 		body["domains"] = vals
 	}
-	return body
+	return body, nil
 }
 
 func (r *PolicyResource) readIntoState(raw []byte, state *PolicyResourceModel) {
@@ -213,7 +227,11 @@ func (r *PolicyResource) readIntoState(raw []byte, state *PolicyResourceModel) {
 	state.Name = StringVal(data, "name")
 	state.DisplayName = StringVal(data, "displayName")
 	state.Description = StringVal(data, "description")
-	state.Rules = StringVal(data, "rules")
+	// rules is intentionally NOT read back from the API response. The API may
+	// reorder JSON fields, producing a string that differs from what the user
+	// wrote. Treating rules as write-only (like connection_json in database
+	// services) keeps state stable. For import, rules is excluded via
+	// ImportStateVerifyIgnore.
 	state.Enabled = BoolVal(data, "enabled")
 	state.Location = StringVal(data, "location")
 	state.FQN = StringVal(data, "fullyQualifiedName")
